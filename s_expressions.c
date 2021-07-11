@@ -26,7 +26,7 @@ enum lval_types { LVAL_ERR, LVAL_NUM, LVAL_SYM, LVAL_SEXPR};
 // Lisp value
 typedef struct lval {
   int type;
-  double num;
+  long num;
   char* err;
   char* sym;
   int count;
@@ -34,7 +34,7 @@ typedef struct lval {
 } lval;
 
 // Create numeric lval
-lval* lval_num(double x) {
+lval* lval_num(long x) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_NUM;
   v->num = x;
@@ -109,7 +109,7 @@ void lval_expr_print(lval* v, char open, char close) {
 // Print out an lval
 void lval_print(lval* v) {
   switch (v->type) {
-    case LVAL_NUM:   printf("%f", v->num); break;
+    case LVAL_NUM:   printf("%li", v->num); break;
     case LVAL_ERR:   printf("Error: %s", v->err); break;
     case LVAL_SYM:   printf("%s", v->sym); break;
     case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
@@ -120,7 +120,7 @@ void lval_println(lval* v) {lval_print(v); putchar('\n');}
 
 lval* lval_read_num(mpc_ast_t* t) {
   errno = 0;
-  double x = strtod(t->contents, NULL);
+  long x = strtol(t->contents, NULL, 10);
   return errno != ERANGE ?
     lval_num(x) : lval_err("invalid number");
 }
@@ -197,7 +197,7 @@ lval* builtin_op(lval* a, char* op) {
         lval_del(x); lval_del(y);
         x = lval_err("Division by zero"); break;
       }
-      x->num = (int) x->num % (int)  y->num;
+      x->num %= y->num;
     }
     lval_del(y);
   }
@@ -253,7 +253,7 @@ int main(int argc, char** argv) {
   /* Language definition */
   mpca_lang(MPCA_LANG_DEFAULT,
             "                                        \
-            number : /-?[0-9]+.?[0-9]*/;                     \
+            number : /-?[0-9]+/;                     \
             symbol : '+' | '-' | '*' | '/' | '%';    \
             sexpr  : '(' <expr>* ')';                \
             expr   : <number> | <symbol> | <sexpr>;  \
