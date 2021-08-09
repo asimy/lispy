@@ -41,7 +41,7 @@ lval* lval_num(long x) {
   return v;
 }
 
-// Create error lval
+// Create character lval
 lval* lval_err(char* m) {
   lval* v = malloc(sizeof(lval));
   v->type = LVAL_ERR;
@@ -240,7 +240,7 @@ lval* lval_eval_sexpr(lval* v) {
   if (f->type != LVAL_SYM) {
     lval_del(f); lval_del(v);
     return lval_err("S-expression must start with a symbol");
-      }
+  }
 
   lval* result = builtin_op(v, f->sym);
   lval_del(f);
